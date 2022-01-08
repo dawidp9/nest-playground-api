@@ -36,6 +36,7 @@ export class RestaurantsController {
   @Put()
   async update(@Body() restaurant: Restaurant): Promise<Restaurant> {
     if (!+restaurant?.id) throw new BadRequestException('Invalid id param');
+
     return this.restaurantsService.update(restaurant);
   }
 
