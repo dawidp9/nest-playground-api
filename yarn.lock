@@ -4222,7 +4222,6 @@ libmime@5.0.0:
     iconv-lite "0.6.2"
     libbase64 "1.2.1"
     libqp "1.1.0"
-
 libphonenumber-js@^1.9.43:
   version "1.9.44"
   resolved "https://registry.yarnpkg.com/libphonenumber-js/-/libphonenumber-js-1.9.44.tgz#d036364fe4c1e27205d1d283c7bf8fc25625200b"
