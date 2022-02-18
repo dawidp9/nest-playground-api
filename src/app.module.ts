@@ -19,9 +19,12 @@ config();
       useFactory: async () => ({
         url: process.env.DATABASE_URL,
         type: 'postgres',
-        ssl: {
-          rejectUnauthorized: false,
-        },
+        ssl:
+          process.env.NODE_ENV == 'development'
+            ? false
+            : {
+                rejectUnauthorized: false,
+              },
         entities: ['dist/**/*.entity{.ts,.js}'],
         synchronize: process.env.NODE_ENV != 'production',
         autoLoadEntities: true,
