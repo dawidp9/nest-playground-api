@@ -1,18 +1,35 @@
-import { Injectable } from '@nestjs/common';
+import { HttpException, Injectable } from '@nestjs/common';
 import { MailerService } from '@nestjs-modules/mailer';
-import { Survey } from '../dto/surey/survey';
+import { SurveyDto } from '../dto/surey/survey.dto';
+import { InjectRepository } from '@nestjs/typeorm';
+import { SurveyEntity } from '../entities/survey.entity';
+import { Repository } from 'typeorm';
 
 @Injectable()
 export class SurveyService {
-  constructor(private readonly mailerService: MailerService) {}
+  constructor(
+    @InjectRepository(SurveyEntity)
+    private surveyRepository: Repository<SurveyEntity>,
+    private readonly mailerService: MailerService,
+  ) {}
 
-  async create(survey: Survey): Promise<boolean> {
+  async create(surveyDto: SurveyDto): Promise<boolean> {
+    const { email, username } = surveyDto;
+
+    const findEmail = await this.surveyRepository.findOne({ email });
+    if (findEmail) {
+      throw new HttpException('Email already exist', 409);
+    }
+
+    const surveyEntity = surveyDto.toEntity();
+    await this.surveyRepository.insert(surveyEntity);
+
     await this.mailerService.sendMail({
       from: process.env.MAIL_ADDRESS,
-      to: survey.email,
+      to: email,
       subject: 'Dziękujemy za zapisanie się!',
-      text: `Cześć ${survey.username.trim()}! Dziękujemy za zapisanie się. Zespół Pielęgniarka24`,
-      html: `Cześć ${survey.username.trim()}!<br> Dziękujemy za zapisanie się. <br><br>Zespół Pielęgniarka24`,
+      text: `Cześć ${username.trim()}! Dziękujemy za zapisanie się. Zespół Pielęgniarka24`,
+      html: `Cześć ${username.trim()}!<br> Dziękujemy za zapisanie się. <br><br>Zespół Pielęgniarka24`,
     });
 
     return true;
