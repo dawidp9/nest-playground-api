@@ -2,8 +2,9 @@ import { Injectable } from '@nestjs/common';
 import { UsersService } from '../users/users.service';
 import * as bcrypt from 'bcrypt';
 import { JwtService } from '@nestjs/jwt';
-import { UserDto } from '../dto/user/user.dto';
-import { UserPayload } from '../dto/user/user_payload';
+import { UserPayload } from './interface/auth.interface';
+import { JwtTokenDto } from '../dto/auth/jwt_token.dto';
+import { UserCredentialsDto } from '../dto/user/user_credentials_dto';
 
 @Injectable()
 export class AuthService {
@@ -13,38 +14,29 @@ export class AuthService {
   ) {}
 
   async validateUser(email: string, password: string): Promise<any> {
-    console.log('AuthService validateUser', email, password);
     const userEntity = await this.usersService.findOneByEmail(email);
 
-    console.log('validateUser userEntity', userEntity);
+    if (!userEntity) return null;
+    const match = await bcrypt.compare(password, userEntity.password);
+    if (match)
+      return {
+        id: userEntity.id,
+        email: userEntity.email,
+      };
 
-    if (userEntity) {
-      const match = await bcrypt.compare(password, userEntity.password);
-      if (match)
-        return {
-          email: userEntity.email,
-          id: userEntity.id,
-          roles: userEntity.roles,
-        };
-    }
     return null;
   }
 
-  async register(userDto: UserDto): Promise<boolean> {
-    await this.usersService.create(userDto);
+  async register(userCredentialsDto: UserCredentialsDto): Promise<boolean> {
+    await this.usersService.create(userCredentialsDto);
     return true;
   }
 
-  async login(user: any): Promise<any> {
-    const payload: UserPayload = {
-      email: user.email,
-      id: user.id,
-      roles: user.roles,
-    };
-    console.log('login payload', payload);
+  async login(user: UserPayload): Promise<JwtTokenDto> {
+    const accessToken = await this.jwtService.signAsync(user);
 
     return {
-      access_token: this.jwtService.sign(payload),
+      access_token: accessToken,
     };
   }
 }

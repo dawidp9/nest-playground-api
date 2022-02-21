@@ -1,38 +1,74 @@
 import {
-  Controller,
-  Post,
-  UseGuards,
-  Request,
-  Get,
   Body,
+  Controller,
+  Get,
+  Post,
+  Request,
+  UseGuards,
 } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { LocalAuthGuard } from './guards/local-auth.guard';
-import { JwtAuthGuard } from './guards/jwt-auth.guard';
-import { UserDto } from '../dto/user/user.dto';
-import { UserPayload } from '../dto/user/user_payload';
+import { RequestWithUser } from './interface/auth.interface';
+import AuthRoleGuard from './guards/roles.guard';
+import {
+  ApiBearerAuth,
+  ApiBody,
+  ApiConflictResponse,
+  ApiCreatedResponse,
+  ApiOkResponse,
+  ApiTags,
+  ApiUnauthorizedResponse,
+} from '@nestjs/swagger';
+import { JwtTokenDto } from '../dto/auth/jwt_token.dto';
+import { BooleanResponseDto } from '../dto/common/boolean_response.dto';
+import { UserCredentialsDto } from '../dto/user/user_credentials_dto';
+import { UserProfileDto } from '../dto/user/user_prfile_dto';
+import {
+  ApiBadRequestExceptionResponse,
+  ApiConflictExceptionResponse,
+  ApiUnauthorizedExceptionResponse,
+} from '../decorators/exceptions.decorator';
 
+@ApiTags('auth')
 @Controller('auth')
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
   @Post('register')
-  async register(@Body() userDto: UserDto): Promise<boolean> {
-    console.log('auth/register userDto', userDto);
-    return this.authService.register(userDto);
+  @ApiBody({
+    description: 'User credentials',
+    type: UserCredentialsDto,
+  })
+  @ApiCreatedResponse({ type: BooleanResponseDto })
+  @ApiBadRequestExceptionResponse()
+  @ApiConflictExceptionResponse()
+  async register(
+    @Body() userCredentialsDto: UserCredentialsDto,
+  ): Promise<BooleanResponseDto> {
+    return { success: await this.authService.register(userCredentialsDto) };
   }
 
-  @UseGuards(LocalAuthGuard)
   @Post('login')
-  async login(@Request() req) {
+  @UseGuards(LocalAuthGuard)
+  @ApiBody({
+    description: 'User credentials',
+    type: UserCredentialsDto,
+  })
+  @ApiCreatedResponse({ description: 'JWT access token', type: JwtTokenDto })
+  @ApiUnauthorizedExceptionResponse()
+  async login(
+    @Request() req: RequestWithUser,
+    @Body() userCredentialsDto: UserCredentialsDto,
+  ): Promise<JwtTokenDto> {
     return this.authService.login(req.user);
   }
 
-  @UseGuards(JwtAuthGuard)
   @Get('profile')
-  async getProfile(@Request() req) {
-    const userPayload: UserPayload = req.user;
-    const { id, email, roles } = userPayload;
-    return { id, email, roles };
+  @UseGuards(AuthRoleGuard())
+  @ApiBearerAuth()
+  @ApiOkResponse({ type: UserProfileDto })
+  @ApiUnauthorizedExceptionResponse()
+  async getProfile(@Request() req: RequestWithUser): Promise<UserProfileDto> {
+    return req.user;
   }
 }

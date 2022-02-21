@@ -1,13 +1,13 @@
 import { Module } from '@nestjs/common';
-import { SurveyService } from './survey.service';
-import { SurveyController } from './survey.controller';
 import { MailerModule } from '@nestjs-modules/mailer';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { SurveyEntity } from '../entities/survey.entity';
+import { NewsletterService } from './newsletter.service';
+import { NewsletterController } from './newsletter.controller';
+import { NewsletterAddressEntity } from '../entities/newsletter_address.entity';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([SurveyEntity]),
+    TypeOrmModule.forFeature([NewsletterAddressEntity]),
     MailerModule.forRootAsync({
       useFactory: async () => ({
         transport: {
@@ -20,7 +20,7 @@ import { SurveyEntity } from '../entities/survey.entity';
       }),
     }),
   ],
-  providers: [SurveyService],
-  controllers: [SurveyController],
+  providers: [NewsletterService],
+  controllers: [NewsletterController],
 })
-export class SurveyModule {}
+export class NewsletterModule {}

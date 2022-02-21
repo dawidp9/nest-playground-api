@@ -1,11 +1,25 @@
 import { ExtractJwt, Strategy } from 'passport-jwt';
 import { PassportStrategy } from '@nestjs/passport';
-import { Injectable } from '@nestjs/common';
-import { UserPayload } from '../../dto/user/user_payload';
+import { Injectable, UnauthorizedException } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
+import { UserEntity } from '../../entities/user.entity';
+import { forEach } from 'lodash';
+import { UserPayload } from '../interface/auth.interface';
+
+type JwtStrategyPayload = {
+  id: number;
+  email: string;
+  iat: number;
+  exp: number;
+};
 
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy) {
-  constructor() {
+  constructor(
+    @InjectRepository(UserEntity)
+    private usersRepository: Repository<UserEntity>,
+  ) {
     super({
       jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
       ignoreExpiration: false,
@@ -13,9 +27,17 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     });
   }
 
-  async validate(payload: UserPayload) {
-    //TODO: Fetch perms from db for example
+  async validate({ id, email }: JwtStrategyPayload): Promise<UserPayload> {
+    const userEntity = await this.usersRepository.findOne(
+      { id },
+      { relations: ['roles'] },
+    );
 
-    return { ...payload };
+    if (!userEntity) throw new UnauthorizedException();
+
+    const userRoles = [];
+    forEach(userEntity.roles, (item) => userRoles.push(item.role));
+
+    return { id, email, roles: userRoles };
   }
 }

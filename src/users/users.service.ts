@@ -4,7 +4,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { UserEntity } from '../entities/user.entity';
 import { ROLE, RoleEntity } from '../entities/role.entity';
-import { UserDto } from '../dto/user/user.dto';
+import { UserCredentialsDto } from '../dto/user/user_credentials_dto';
 
 @Injectable()
 export class UsersService {
@@ -16,17 +16,14 @@ export class UsersService {
   ) {}
 
   async findOneByEmail(email: string): Promise<UserEntity | undefined> {
-    return await this.usersRepository.findOne(
-      {
-        email: email.trim().toLocaleLowerCase(),
-      },
-      { relations: ['roles'] },
-    );
+    return await this.usersRepository.findOne({
+      email: email.trim().toLocaleLowerCase(),
+    });
   }
 
-  async create(userDto: UserDto): Promise<boolean> {
-    const email = userDto.email.trim().toLocaleLowerCase();
-    const password = userDto.password;
+  async create(userCredentialsDto: UserCredentialsDto): Promise<boolean> {
+    const email = userCredentialsDto.email.trim().toLocaleLowerCase();
+    const password = userCredentialsDto.password;
 
     const userExist = await this.usersRepository.findOne({
       email,
