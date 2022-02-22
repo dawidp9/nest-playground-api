@@ -1,6 +1,6 @@
 import { IsEmail, IsString, Length } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
-import { NewsletterAddressEntity } from '../../entities/newsletter_address.entity';
+import { NewsletterAddressEntity } from '../../entities/newsletter-address.entity';
 
 export class NewsletterAddressDto implements Readonly<NewsletterAddressDto> {
   @ApiProperty()

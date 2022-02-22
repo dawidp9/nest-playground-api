@@ -25,10 +25,10 @@ import {
   ApiNotFoundExceptionResponse,
   ApiUnauthorizedExceptionResponse,
 } from '../decorators/exceptions.decorator';
-import { BooleanResponseDto } from '../dto/common/boolean_response.dto';
-import { NewsletterAddressesResponseDto } from '../dto/newsletter/newsletter_addresses_response.dto';
-import { NewsletterAddressDto } from '../dto/newsletter/newsletter_address.dto';
-import { NewsletterAddressEntity } from '../entities/newsletter_address.entity';
+import { BooleanResponseDto } from '../dto/common/boolean-response.dto';
+import { NewsletterAddressesResponseDto } from '../dto/newsletter/newsletter-addresses-response.dto';
+import { NewsletterAddressDto } from '../dto/newsletter/newsletter-address.dto';
+import { NewsletterAddressEntity } from '../entities/newsletter-address.entity';
 
 @ApiTags('newsletter')
 @Controller('newsletter')

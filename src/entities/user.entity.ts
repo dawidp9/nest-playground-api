@@ -34,7 +34,6 @@ export class UserEntity extends BaseEntity {
   @JoinTable()
   roles: RoleEntity[];
 
-  @ApiModelProperty({ type: [TokenEntity] })
   @OneToMany(() => TokenEntity, (token) => token.owner)
   @JoinTable()
   tokens: TokenEntity[];

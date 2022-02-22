@@ -5,11 +5,11 @@ import {
   ApiNotFoundResponse,
   ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
-import { UnauthorizedResponseDto } from '../dto/common/unauthorized_response.dto';
-import { ForbiddenResponseDto } from '../dto/common/forbidden_response.dto';
-import { ConflictResponseDto } from '../dto/common/conflict_response.dto';
-import { BadRequestResponseDto } from '../dto/common/bad_request_response.dto';
-import { NotFoundResponseDto } from '../dto/common/not_found_response.dto';
+import { UnauthorizedResponseDto } from '../dto/common/unauthorized-response.dto';
+import { ForbiddenResponseDto } from '../dto/common/forbidden-response.dto';
+import { ConflictResponseDto } from '../dto/common/conflict-response.dto';
+import { BadRequestResponseDto } from '../dto/common/bad-request-response.dto';
+import { NotFoundResponseDto } from '../dto/common/not-found-response.dto';
 
 export const ApiUnauthorizedExceptionResponse = () =>
   ApiUnauthorizedResponse({

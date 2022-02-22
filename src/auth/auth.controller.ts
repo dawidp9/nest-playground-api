@@ -7,27 +7,27 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { AuthService } from './auth.service';
-import { LocalAuthGuard } from './guards/local-auth.guard';
+import { LocalAuthGuard } from './guards/local-auth-guard.service';
 import { RequestWithUser } from './interface/auth.interface';
-import AuthRoleGuard from './guards/roles.guard';
 import {
   ApiBearerAuth,
   ApiBody,
-  ApiConflictResponse,
   ApiCreatedResponse,
   ApiOkResponse,
   ApiTags,
-  ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
-import { JwtTokenDto } from '../dto/auth/jwt_token.dto';
-import { BooleanResponseDto } from '../dto/common/boolean_response.dto';
-import { UserCredentialsDto } from '../dto/user/user_credentials_dto';
-import { UserProfileDto } from '../dto/user/user_prfile_dto';
+import { JwtTokenDto } from '../dto/auth/jwt-token.dto';
+import { BooleanResponseDto } from '../dto/common/boolean-response.dto';
+import { UserCredentialsDto } from '../dto/user/user-credentials.dto';
+import { UserProfileDto } from '../dto/user/user-profile.dto';
 import {
   ApiBadRequestExceptionResponse,
   ApiConflictExceptionResponse,
   ApiUnauthorizedExceptionResponse,
 } from '../decorators/exceptions.decorator';
+import { JwtRefreshAuthGuard } from './guards/jwt-refresh-auth-guard.service';
+import { JwtAuthGuard } from './guards/jwt-auth.guard';
+import { JwtRefreshTokenDto } from '../dto/auth/jwt-refresh-token.dto';
 
 @ApiTags('auth')
 @Controller('auth')
@@ -54,17 +54,49 @@ export class AuthController {
     description: 'User credentials',
     type: UserCredentialsDto,
   })
-  @ApiCreatedResponse({ description: 'JWT access token', type: JwtTokenDto })
+  @ApiCreatedResponse({
+    description: 'JWT access and refresh token',
+    type: JwtTokenDto,
+  })
   @ApiUnauthorizedExceptionResponse()
   async login(
     @Request() req: RequestWithUser,
     @Body() userCredentialsDto: UserCredentialsDto,
   ): Promise<JwtTokenDto> {
-    return this.authService.login(req.user);
+    return this.authService.getJWTokens(req.user);
+  }
+
+  @Post('refresh')
+  @UseGuards(JwtRefreshAuthGuard)
+  @ApiBody({
+    description: 'JWT refresh token',
+    type: JwtRefreshTokenDto,
+  })
+  @ApiCreatedResponse({
+    description: 'JWT access and refresh token',
+    type: JwtTokenDto,
+  })
+  @ApiUnauthorizedExceptionResponse()
+  async refresh(
+    @Request() req: RequestWithUser,
+    @Body() jwtRefreshTokenDto: JwtRefreshTokenDto,
+  ): Promise<JwtTokenDto> {
+    return this.authService.getJWTokens(req.user);
+  }
+
+  @Post('logout')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @ApiOkResponse({
+    type: BooleanResponseDto,
+  })
+  @ApiUnauthorizedExceptionResponse()
+  async logout(@Request() req: RequestWithUser): Promise<BooleanResponseDto> {
+    return this.authService.logout(req.user);
   }
 
   @Get('profile')
-  @UseGuards(AuthRoleGuard())
+  @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
   @ApiOkResponse({ type: UserProfileDto })
   @ApiUnauthorizedExceptionResponse()

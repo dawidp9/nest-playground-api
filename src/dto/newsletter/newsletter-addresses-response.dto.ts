@@ -1,7 +1,7 @@
 import { IsNumber } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 import { ApiModelProperty } from '@nestjs/swagger/dist/decorators/api-model-property.decorator';
-import { NewsletterAddressEntity } from '../../entities/newsletter_address.entity';
+import { NewsletterAddressEntity } from '../../entities/newsletter-address.entity';
 
 export class NewsletterAddressesResponseDto
   implements Readonly<NewsletterAddressesResponseDto>
