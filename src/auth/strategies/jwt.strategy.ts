@@ -1,10 +1,20 @@
 import { ExtractJwt, Strategy } from 'passport-jwt';
 import { PassportStrategy } from '@nestjs/passport';
-import { Injectable } from '@nestjs/common';
+import { Injectable, UnauthorizedException } from '@nestjs/common';
+import { forEach } from 'lodash';
+import { UserPayload } from '../interface/auth.interface';
+import { UsersService } from '../../users/users.service';
+
+export interface JwtStrategyPayload {
+  id: number;
+  email: string;
+  iat: number;
+  exp: number;
+}
 
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy) {
-  constructor() {
+  constructor(private readonly usersService: UsersService) {
     super({
       jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
       ignoreExpiration: false,
@@ -12,9 +22,13 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     });
   }
 
-  async validate(payload: any) {
-    //TODO: Fetch perms from db for example
+  async validate({ id, email }: JwtStrategyPayload): Promise<UserPayload> {
+    const userEntity = await this.usersService.findOneById(id, true);
+    if (!userEntity) throw new UnauthorizedException();
 
-    return { userId: payload.userId, email: payload.email };
+    const userRoles = [];
+    forEach(userEntity.roles, (item) => userRoles.push(item.role));
+
+    return { id, email, roles: userRoles };
   }
 }
