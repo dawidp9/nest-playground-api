@@ -7,7 +7,7 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { AuthService } from './auth.service';
-import { LocalAuthGuard } from './guards/local-auth-guard.service';
+import { LocalAuthGuard } from './guards/local-auth.guard';
 import { RequestWithUser } from './interface/auth.interface';
 import {
   ApiBearerAuth,
@@ -25,7 +25,7 @@ import {
   ApiConflictExceptionResponse,
   ApiUnauthorizedExceptionResponse,
 } from '../decorators/exceptions.decorator';
-import { JwtRefreshAuthGuard } from './guards/jwt-refresh-auth-guard.service';
+import { JwtRefreshAuthGuard } from './guards/jwt-refresh-auth.guard';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
 import { JwtRefreshTokenDto } from '../dto/auth/jwt-refresh-token.dto';
 
