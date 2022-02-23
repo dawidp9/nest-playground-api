@@ -1,10 +1,10 @@
 import {
-  BadRequestException,
   Body,
   Controller,
   Delete,
   Get,
   Param,
+  ParseIntPipe,
   Post,
   UseGuards,
 } from '@nestjs/common';
@@ -61,10 +61,8 @@ export class NewsletterController {
   @ApiForbiddenExceptionResponse()
   @ApiBadRequestExceptionResponse()
   async getAddressById(
-    @Param('id') id: number,
+    @Param('id', ParseIntPipe) id: number,
   ): Promise<NewsletterAddressEntity> {
-    if (!+id) throw new BadRequestException('Invalid id param');
-
     return await this.newsletterService.findOneById(+id);
   }
 
@@ -80,10 +78,8 @@ export class NewsletterController {
   @ApiForbiddenExceptionResponse()
   @ApiBadRequestExceptionResponse()
   async deleteAddressById(
-    @Param('id') id: number,
+    @Param('id', ParseIntPipe) id: number,
   ): Promise<BooleanResponseDto> {
-    if (!+id) throw new BadRequestException('Invalid id param');
-
     return { success: await this.newsletterService.deleteOneById(+id) };
   }
 
